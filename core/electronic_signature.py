@@ -19,10 +19,6 @@ class ElectronicSignature:
     def __init__(self, key_size=None):
         if key_size:
             self.public_key, self.private_key = rsa.newkeys(key_size)
-        # print(f'{self.private_key=}')
-            print(f'{self.public_key=}')
-            global old_key
-            old_key = self.public_key
 
     def set_encoder(self, encoder: IEncoder):
         self.encoder = encoder
@@ -33,38 +29,26 @@ class ElectronicSignature:
     def sign(self, doc_name: pathlib.Path):
         file_info = FileInfo.collect(doc_name)
         file_info_json = file_info.to_json()
-        global old_data
-        old_data = file_info_json
-        print('old_data', old_data)
         self.signed_val = rsa.sign(file_info_json.encode(), self.private_key, "SHA-1")
 
     def save_signature(self, user_name: str, signature_file_name: pathlib.Path):
         with open(signature_file_name, "wb") as f:
             f.write(user_name.encode() + SPECIAL_DELIMETER)
-            f.write(self.signed_val + SPECIAL_DELIMETER) 
-            f.write(self.public_key.save_pkcs1("DER"))
+            f.write(self.signed_val)
 
-    def verify(self, doc_name: pathlib.Path, signature_file_name: pathlib.Path) -> VerifyStatus:
+    def verify(self, doc_name: pathlib.Path, signature_file_name: pathlib.Path, public_key_file: pathlib.Path) -> VerifyStatus:
         file_info = FileInfo.collect(doc_name)
         file_info_json = file_info.to_json()
         with open(signature_file_name, "rb") as f:
             data = f.read()
-        user_name, signature, public_key_val = data.split(SPECIAL_DELIMETER)
+        with open(public_key_file, "rb") as f:
+            public_key_val = f.read()
+        user_name, signature = data.split(SPECIAL_DELIMETER)
         self.public_key = rsa.PublicKey.load_pkcs1(public_key_val, "DER")
         try:
-            # print(f'{self.private_key=}')
-            print(f'{self.public_key=}')
-            global new_key
-            new_key = self.public_key
-            global new_data
-            new_data = file_info_json
-            print('old_key==new_key', old_key==new_key)
-            print('old_data==new_data', old_data==new_data)
-            print('new_data', new_data)
             rsa.verify(file_info_json.encode(), signature, self.public_key)
             return VerifyStatus(True, user_name.decode())
-        except Exception as e:
-            print(e)
+        except Exception:
             return VerifyStatus(False, user_name.decode())
         
     def save_keys(self, folder_name: pathlib.Path):
@@ -83,7 +67,6 @@ class ElectronicSignature:
     def _save_private_key(self, private_key_path: pathlib.Path):
         with open(private_key_path, "wb") as f:
             f.write(self.encoder(SPECIAL_PHRASE_TO_CHECK_CORRECT_DECODING + self.private_key.save_pkcs1("DER")))
-            # f.write(self.private_key.save_pkcs1("DER"))
 
     def _load_public_key(self, public_key_file_name: pathlib.Path):
         with open(public_key_file_name, "rb") as f:
@@ -97,5 +80,4 @@ class ElectronicSignature:
         if SPECIAL_PHRASE_TO_CHECK_CORRECT_DECODING not in decoded_data:
             return False
         self.private_key = rsa.PrivateKey.load_pkcs1(decoded_data[len(SPECIAL_PHRASE_TO_CHECK_CORRECT_DECODING):], "DER")
-        # self.private_key = rsa.PrivateKey.load_pkcs1(data, "DER")
         return True

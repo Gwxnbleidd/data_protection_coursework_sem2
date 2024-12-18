@@ -36,9 +36,12 @@ class MainWindow(QMainWindow):
     def _signalCheckSignatureDocument(self):
         fileName, _ = QFileDialog.getOpenFileName(self, "Выберите файл")
         signatureFileName, _ = QFileDialog.getOpenFileName(self, "Укажите путь к файлу с подписью")
+        keysFolderName = QFileDialog.getExistingDirectory(self, "Выберите папку, хранящую публичный ключ")
 
-        electronic_signature = ElectronicSignature()  
-        verifyStatus = electronic_signature.verify(pathlib.Path(fileName), pathlib.Path(signatureFileName))
+        electronic_signature = ElectronicSignature()
+
+        verifyStatus = electronic_signature.verify(pathlib.Path(fileName), pathlib.Path(signatureFileName),
+                                                   pathlib.Path(keysFolderName + '/public_key'))
         
         message = (
             f"Файл {fileName.title()}, был подписан пользователем {verifyStatus.user_name}" 
