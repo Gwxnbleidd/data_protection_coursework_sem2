@@ -11,10 +11,7 @@ class FileInfo:
     st_nlink: int 
     st_uid: int 
     st_gid: int 
-    st_size: int 
-    st_atime: int 
-    st_mtime: int 
-    st_ctime: int 
+    st_size: int
 
     def to_dict(self) -> dict[str, int]:
         return asdict(self)
@@ -33,7 +30,4 @@ class FileInfo:
             st_uid=file_props.st_uid,
             st_gid=file_props.st_gid,
             st_size=file_props.st_size,
-            st_atime=file_props.st_atime,
-            st_mtime=file_props.st_mtime,
-            st_ctime=file_props.st_ctime,
         )

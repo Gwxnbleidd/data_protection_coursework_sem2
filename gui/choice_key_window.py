@@ -32,8 +32,6 @@ class ChoiseKeyWindow(QWidget):
   
         electronic_signature = ElectronicSignature(int(keySize))  
         electronic_signature.sign(pathlib.Path(fileName))
-        print(f'{electronic_signature.private_key=}')
-        print(f'{electronic_signature.public_key=}')
         
         electronicSignatureFileName, _ = QFileDialog.getSaveFileName(self, "Введите имя файла, куда необходимо сохранить подпись?")
         electronic_signature.save_signature(userName, pathlib.Path(electronicSignatureFileName))
@@ -49,9 +47,6 @@ class ChoiseKeyWindow(QWidget):
         key, _ = QInputDialog.getText(self, "Введите ключ для расшифрования приватного ключа", "Ключ")
         electronic_signature = ElectronicSignature()  
         electronic_signature.set_decoder(ARC4Decoder(key=key))
-
-        print(f'{electronic_signature.private_key=}')
-        print(f'{electronic_signature.public_key=}')
 
         statusLoadKeys = electronic_signature.load_keys(pathlib.Path(keysFolderName))
         if not statusLoadKeys:
