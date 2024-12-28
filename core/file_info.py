@@ -3,6 +3,7 @@ import pathlib
 import json
 from dataclasses import asdict, dataclass
 
+
 @dataclass
 class FileInfo:
     st_mode: int 

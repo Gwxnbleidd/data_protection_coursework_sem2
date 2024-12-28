@@ -3,7 +3,7 @@ import tkinter as tk
 from tkinter import filedialog, messagebox
 
 from core.electronic_signature import ElectronicSignature
-from .choice_key_window import ChoiseKeyWindow
+from gui.choice_key_window import ChoiseKeyWindow
 
 class MainWindow(tk.Tk):
     def __init__(self):

@@ -3,6 +3,7 @@ import tkinter as tk
 from tkinter import filedialog, simpledialog
 from core.electronic_signature import ElectronicSignature
 
+
 class ChoiseKeyWindow(tk.Toplevel):
     def __init__(self, parent=None):
         super().__init__(parent)
