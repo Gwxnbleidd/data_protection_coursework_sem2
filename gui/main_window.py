@@ -1,56 +1,39 @@
 import pathlib
-
-from PyQt6.QtWidgets import (QPushButton, QVBoxLayout, QMainWindow, 
-                             QWidget, QFileDialog, QMessageBox)
-from PyQt6.QtCore import QSize
+import tkinter as tk
+from tkinter import filedialog, messagebox
 
 from core.electronic_signature import ElectronicSignature
 from .choice_key_window import ChoiseKeyWindow
 
-class MainWindow(QMainWindow):
-    def __init__(self, parent: QWidget | None = None):
-        super().__init__(parent)
-        self.checkSignatureButton = QPushButton("Проверить документ")
-        self.signSignatureButton = QPushButton("Подписать документ")
+class MainWindow(tk.Tk):
+    def __init__(self):
+        super().__init__()
+        self.title("Электронная подпись")
+        self.geometry("400x400")
 
-        self.setWindowTitle("Электронная подпись")
-        self.setFixedSize(QSize(400, 400))
+        self.checkSignatureButton = tk.Button(self, text="Проверить документ", command=self._signalCheckSignatureDocument)
+        self.signSignatureButton = tk.Button(self, text="Подписать документ", command=self._signalSignDocument)
 
-        vBoxLayout = QVBoxLayout()
-        vBoxLayout.addWidget(self.checkSignatureButton)
-        vBoxLayout.addWidget(self.signSignatureButton)
-
-        widget = QWidget()
-        widget.setLayout(vBoxLayout)
-
-        self.setCentralWidget(widget)
-
-        # set signals
-        self.signSignatureButton.pressed.connect(self._signalSignDocument)
-        self.checkSignatureButton.pressed.connect(self._signalCheckSignatureDocument)
+        self.checkSignatureButton.pack(pady=10)
+        self.signSignatureButton.pack(pady=10)
 
     def _signalSignDocument(self):
         self.choiseKeyWindow = ChoiseKeyWindow()
         self.choiseKeyWindow.show()
 
     def _signalCheckSignatureDocument(self):
-        fileName, _ = QFileDialog.getOpenFileName(self, "Выберите файл")
-        signatureFileName, _ = QFileDialog.getOpenFileName(self, "Укажите путь к файлу с подписью")
-        keysFolderName = QFileDialog.getExistingDirectory(self, "Выберите папку, хранящую публичный ключ")
+        fileName = filedialog.askopenfilename(title="Выберите файл")
+        signatureFileName = filedialog.askopenfilename(title="Укажите путь к файлу с подписью")
+        keysFolderName = filedialog.askdirectory(title="Выберите папку, хранящую публичный ключ")
 
         electronic_signature = ElectronicSignature()
 
         verifyStatus = electronic_signature.verify(pathlib.Path(fileName), pathlib.Path(signatureFileName),
                                                    pathlib.Path(keysFolderName + '/public_key'))
-        
+
         message = (
-            f"Файл {fileName.title()}, был подписан пользователем {verifyStatus.user_name}" 
+            f"Файл {fileName.title()}, был подписан пользователем {verifyStatus.user_name}"
             if verifyStatus.status
             else f"Файл {fileName.title()}, был кем-то изменен, после подписания пользователем {verifyStatus.user_name}")
-        
-        self.signatureVerifyMessageBox = QMessageBox()
-        self.signatureVerifyMessageBox.setWindowTitle("Информация")
-        self.signatureVerifyMessageBox.setText(message)
-        self.signatureVerifyMessageBox.show()
 
-
+        messagebox.showinfo("Информация", message)

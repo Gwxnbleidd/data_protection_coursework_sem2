@@ -1,55 +1,71 @@
 import pathlib
-
-from PyQt6.QtWidgets import (QWidget, QPushButton, 
-                             QVBoxLayout, QFileDialog, QInputDialog, QMessageBox)
-
+import tkinter as tk
+from tkinter import filedialog, simpledialog
 from core.electronic_signature import ElectronicSignature
 
-class ChoiseKeyWindow(QWidget):
-    def __init__(self, parent: QWidget | None = None):
+class ChoiseKeyWindow(tk.Toplevel):
+    def __init__(self, parent=None):
         super().__init__(parent)
 
-        self.generateNewKeyButton = QPushButton("Создать новые ключи")
-        self.usingExistingKeyButton = QPushButton("Использовать существующие ключи")
+        self.title("Выбор ключей")
+        self.geometry("400x200")
 
-        vBoxLayout = QVBoxLayout()
-        vBoxLayout.addWidget(self.generateNewKeyButton)
-        vBoxLayout.addWidget(self.usingExistingKeyButton)
+        self.generateNewKeyButton = tk.Button(self, text="Создать новые ключи", command=self._signalGenerateNewKey)
+        self.usingExistingKeyButton = tk.Button(self, text="Использовать существующие ключи", command=self._signalUsingExistingKey)
 
-        self.setLayout(vBoxLayout)
-
-        self.generateNewKeyButton.pressed.connect(self._signalGenerateNewKey)
-        self.usingExistingKeyButton.pressed.connect(self._signalUsingExistingKey)
+        self.generateNewKeyButton.pack(pady=10)
+        self.usingExistingKeyButton.pack(pady=10)
 
     def _signalGenerateNewKey(self):
-        keySize, _ = QInputDialog.getText(self, "Введите размер ключа", "Размер ключа")
+        keySize = simpledialog.askstring("Введите размер ключа", "Размер ключа")
+        if keySize is None:
+            return
 
-        fileName, _ = QFileDialog.getOpenFileName(self, "Выберите файл")
+        fileName = filedialog.askopenfilename(title="Выберите файл")
+        if not fileName:
+            return
 
-        userName, _ = QInputDialog.getText(self, "Введите имя подписывающего", "Имя")
-  
-        electronic_signature = ElectronicSignature(int(keySize))  
+        userName = simpledialog.askstring("Введите имя подписывающего", "Имя")
+        if userName is None:
+            return
+
+        electronic_signature = ElectronicSignature(int(keySize))
         electronic_signature.sign(pathlib.Path(fileName))
-        
-        electronicSignatureFileName, _ = QFileDialog.getSaveFileName(self, "Введите имя файла, куда необходимо сохранить подпись?")
+
+        electronicSignatureFileName = filedialog.asksaveasfilename(title="Введите имя файла, куда необходимо сохранить подпись?")
+        if not electronicSignatureFileName:
+            return
+
         electronic_signature.save_signature(userName, pathlib.Path(electronicSignatureFileName))
 
-        keysFolderName = QFileDialog.getExistingDirectory(self, "Введите имя файла для сохранения ключей")
+        keysFolderName = filedialog.askdirectory(title="Введите имя файла для сохранения ключей")
+        if not keysFolderName:
+            return
+
         electronic_signature.save_keys(pathlib.Path(keysFolderName))
-        self.close()
+        self.destroy()
 
     def _signalUsingExistingKey(self):
-        keysFolderName = QFileDialog.getExistingDirectory(self, "Введите имя файла для откуда взять ключи")
-        electronic_signature = ElectronicSignature()
+        keysFolderName = filedialog.askdirectory(title="Введите имя файла для откуда взять ключи")
+        if not keysFolderName:
+            return
 
+        electronic_signature = ElectronicSignature()
         electronic_signature.load_keys(pathlib.Path(keysFolderName))
 
+        fileName = filedialog.askopenfilename(title="Выберите файл")
+        if not fileName:
+            return
 
-        fileName, _ = QFileDialog.getOpenFileName(self, "Выберите файл")
-        userName, _ = QInputDialog.getText(self, "Введите имя подписывающего", "Имя")
+        userName = simpledialog.askstring("Введите имя подписывающего", "Имя")
+        if userName is None:
+            return
 
         electronic_signature.sign(pathlib.Path(fileName))
 
-        electronicSignatureFileName, _ = QFileDialog.getSaveFileName(self, "Введите имя файла, куда необходимо сохранить подпись?")
+        electronicSignatureFileName = filedialog.asksaveasfilename(title="Введите имя файла, куда необходимо сохранить подпись?")
+        if not electronicSignatureFileName:
+            return
+
         electronic_signature.save_signature(userName, pathlib.Path(electronicSignatureFileName))
-        self.close()
+        self.destroy()

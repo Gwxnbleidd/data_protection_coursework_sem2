@@ -9,11 +9,6 @@ from PyQt6.QtWidgets import QApplication
 
 from gui.main_window import MainWindow
 
-def main() -> int:
-    app = QApplication([])
-    mainWindow = MainWindow()
-    mainWindow.show()
-    return app.exec()
-
 if __name__ == "__main__":
-    main()
+    app = MainWindow()
+    app.mainloop()
