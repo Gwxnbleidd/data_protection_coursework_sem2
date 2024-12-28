@@ -9,7 +9,17 @@ class ChoiseKeyWindow(tk.Toplevel):
         super().__init__(parent)
 
         self.title("Выбор ключей")
-        self.geometry("400x200")
+
+        screen_width = self.winfo_screenwidth()
+        screen_height = self.winfo_screenheight()
+        x_val, y_val = 250, 100
+
+        # Вычисляем координаты для центрирования окна
+        x = (screen_width // 2) - (x_val // 2)
+        y = (screen_height // 2) - (y_val // 2)
+
+        # Устанавливаем геометрию окна
+        self.geometry(f'{x_val}x{y_val}+{x}+{y}')
 
         self.generateNewKeyButton = tk.Button(self, text="Создать новые ключи", command=self._signalGenerateNewKey)
         self.usingExistingKeyButton = tk.Button(self, text="Использовать существующие ключи", command=self._signalUsingExistingKey)

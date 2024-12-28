@@ -11,11 +11,24 @@ class MainWindow(tk.Tk):
         self.title("Электронная подпись")
         self.geometry("400x400")
 
+        screen_width = self.winfo_screenwidth()
+        screen_height = self.winfo_screenheight()
+        x_val, y_val = 250, 150
+
+        # Вычисляем координаты для центрирования окна
+        x = (screen_width // 2) - (x_val // 2)
+        y = (screen_height // 2) - (y_val // 2)
+
+        # Устанавливаем геометрию окна
+        self.geometry(f'{x_val}x{y_val}+{x}+{y}')
+
         self.checkSignatureButton = tk.Button(self, text="Проверить документ", command=self._signalCheckSignatureDocument)
         self.signSignatureButton = tk.Button(self, text="Подписать документ", command=self._signalSignDocument)
+        self.fio_label = tk.Label(self, text="А-13-21 Гайчуков Дмитрий")
 
         self.checkSignatureButton.pack(pady=10)
         self.signSignatureButton.pack(pady=10)
+        self.fio_label.pack(pady=10)
 
     def _signalSignDocument(self):
         self.choiseKeyWindow = ChoiseKeyWindow()
