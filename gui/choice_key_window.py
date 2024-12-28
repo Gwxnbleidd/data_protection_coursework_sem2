@@ -10,16 +10,16 @@ class ChoiseKeyWindow(QWidget):
         super().__init__(parent)
 
         self.generateNewKeyButton = QPushButton("Создать новые ключи")
-        # self.usingExistingKeyButton = QPushButton("Использовать существующие ключи")
+        self.usingExistingKeyButton = QPushButton("Использовать существующие ключи")
 
         vBoxLayout = QVBoxLayout()
         vBoxLayout.addWidget(self.generateNewKeyButton)
-        # vBoxLayout.addWidget(self.usingExistingKeyButton)
+        vBoxLayout.addWidget(self.usingExistingKeyButton)
 
         self.setLayout(vBoxLayout)
 
         self.generateNewKeyButton.pressed.connect(self._signalGenerateNewKey)
-        # self.usingExistingKeyButton.pressed.connect(self._signalUsingExistingKey)
+        self.usingExistingKeyButton.pressed.connect(self._signalUsingExistingKey)
 
     def _signalGenerateNewKey(self):
         keySize, _ = QInputDialog.getText(self, "Введите размер ключа", "Размер ключа")
@@ -38,26 +38,18 @@ class ChoiseKeyWindow(QWidget):
         electronic_signature.save_keys(pathlib.Path(keysFolderName))
         self.close()
 
-    # def _signalUsingExistingKey(self):
-    #     keysFolderName = QFileDialog.getExistingDirectory(self, "Введите имя файла для откуда взять ключи")
-    #     key, _ = QInputDialog.getText(self, "Введите ключ для расшифрования приватного ключа", "Ключ")
-    #     electronic_signature = ElectronicSignature()
-    #     electronic_signature.set_decoder(ARC4Decoder(key=key))
-    #
-    #     statusLoadKeys = electronic_signature.load_keys(pathlib.Path(keysFolderName))
-    #     if not statusLoadKeys:
-    #         self.invalidPrivateKeyMessageBox = QMessageBox()
-    #         self.invalidPrivateKeyMessageBox.setWindowTitle("Ошибка")
-    #         self.invalidPrivateKeyMessageBox.setText("Вы ввели некорректный ключ")
-    #         self.invalidPrivateKeyMessageBox.show()
-    #         self.close()
-    #         return
-    #
-    #     fileName, _ = QFileDialog.getOpenFileName(self, "Выберите файл")
-    #     userName, _ = QInputDialog.getText(self, "Введите имя подписывающего", "Имя")
-    #
-    #     electronic_signature.sign(pathlib.Path(fileName))
-    #
-    #     electronicSignatureFileName, _ = QFileDialog.getSaveFileName(self, "Введите имя файла, куда необходимо сохранить подпись?")
-    #     electronic_signature.save_signature(userName, pathlib.Path(electronicSignatureFileName))
-    #     self.close()
+    def _signalUsingExistingKey(self):
+        keysFolderName = QFileDialog.getExistingDirectory(self, "Введите имя файла для откуда взять ключи")
+        electronic_signature = ElectronicSignature()
+
+        electronic_signature.load_keys(pathlib.Path(keysFolderName))
+
+
+        fileName, _ = QFileDialog.getOpenFileName(self, "Выберите файл")
+        userName, _ = QInputDialog.getText(self, "Введите имя подписывающего", "Имя")
+
+        electronic_signature.sign(pathlib.Path(fileName))
+
+        electronicSignatureFileName, _ = QFileDialog.getSaveFileName(self, "Введите имя файла, куда необходимо сохранить подпись?")
+        electronic_signature.save_signature(userName, pathlib.Path(electronicSignatureFileName))
+        self.close()
