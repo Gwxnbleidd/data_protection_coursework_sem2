@@ -1,6 +1,6 @@
 import pathlib
 import tkinter as tk
-from tkinter import filedialog, simpledialog
+from tkinter import filedialog, simpledialog, messagebox
 from core.electronic_signature import ElectronicSignature
 
 
@@ -53,7 +53,11 @@ class ChoiseKeyWindow(tk.Toplevel):
         if not keysFolderName:
             return
 
-        electronic_signature.save_keys(pathlib.Path(keysFolderName))
+        secret_phrase = simpledialog.askstring("Введите парольную фразу для ключей", "Парольная фраза")
+        if secret_phrase is None:
+            return
+
+        electronic_signature.save_keys(pathlib.Path(keysFolderName), secret_phrase)
         self.destroy()
 
     def _signalUsingExistingKey(self):
@@ -61,8 +65,17 @@ class ChoiseKeyWindow(tk.Toplevel):
         if not keysFolderName:
             return
 
+        secret_phrase = simpledialog.askstring("Введите парольную фразу для ключей", "Парольная фраза")
+        if secret_phrase is None:
+            return
+
         electronic_signature = ElectronicSignature()
-        electronic_signature.load_keys(pathlib.Path(keysFolderName))
+        try:
+            electronic_signature.load_keys(pathlib.Path(keysFolderName), secret_phrase)
+        except ValueError as e:
+            messagebox.showerror("Ошибка", "Вы ввели некорректный ключ")
+            self.destroy()
+            return
 
         fileName = filedialog.askopenfilename(title="Выберите файл")
         if not fileName:
