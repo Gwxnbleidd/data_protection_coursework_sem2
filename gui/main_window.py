@@ -23,7 +23,8 @@ class MainWindow(tk.Tk):
         # Устанавливаем геометрию окна
         self.geometry(f'{x_val}x{y_val}+{x}+{y}')
 
-        self.checkSignatureButton = tk.Button(self, text="Проверить документ", command=self._signalCheckSignatureDocument)
+        self.checkSignatureButton = tk.Button(self, text="Проверить документ",
+                                              command=self._signalCheckSignatureDocument)
         self.signSignatureButton = tk.Button(self, text="Подписать документ", command=self._signalSignDocument)
         self.fio_label = tk.Label(self, text="А-13-21 Гайчуков Дмитрий")
 
@@ -36,18 +37,20 @@ class MainWindow(tk.Tk):
         self.choiseKeyWindow.show()
 
     def _signalCheckSignatureDocument(self):
-        fileName = filedialog.askopenfilename(title="Выберите файл")
+        fileName = filedialog.askopenfilename(title="Выберите файл, который нужно проверить")
         signatureFileName = filedialog.askopenfilename(title="Укажите путь к файлу с подписью")
-        keysFolderName = filedialog.askdirectory(title="Выберите папку, хранящую публичный ключ")
+        publicKeyPath = filedialog.askopenfilename(title="Выберите публичный ключ")
 
         electronic_signature = ElectronicSignature()
 
-        verifyStatus = electronic_signature.verify(pathlib.Path(fileName), pathlib.Path(signatureFileName),
-                                                   pathlib.Path(keysFolderName + '/public_key'))
-
-        message = (
-            f"Файл {fileName.title()}, был подписан пользователем {verifyStatus.user_name}"
-            if verifyStatus.status
-            else f"Файл {fileName.title()}, был кем-то изменен, после подписания пользователем {verifyStatus.user_name}")
+        try:
+            verifyStatus = electronic_signature.verify(pathlib.Path(fileName), pathlib.Path(signatureFileName),
+                                                   pathlib.Path(publicKeyPath))
+            if verifyStatus.status:
+                message = f"Файл {fileName.title()}, был подписан пользователем {verifyStatus.user_name}"
+            else:
+                message = f"Файл {fileName.title()}, был кем-то изменен, после подписания пользователем {verifyStatus.user_name}"
+        except Exception:
+            message = f"Ошибка! Выбран некорректный файл"
 
         messagebox.showinfo("Информация", message)
