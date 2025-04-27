@@ -22,17 +22,30 @@ class ChoiseKeyWindow(tk.Toplevel):
         self.geometry(f'{x_val}x{y_val}+{x}+{y}')
 
         self.generateNewKeyButton = tk.Button(self, text="Создать новые ключи", command=self._signalGenerateNewKey)
-        self.usingExistingKeyButton = tk.Button(self, text="Использовать существующие ключи", command=self._signalUsingExistingKey)
+        self.usingExistingKeyButton = tk.Button(self, text="Использовать существующие ключи",
+                                                command=self._signalUsingExistingKey)
 
         self.generateNewKeyButton.pack(pady=10)
         self.usingExistingKeyButton.pack(pady=10)
 
     def _signalGenerateNewKey(self):
-        keySize = simpledialog.askstring("Введите размер ключа", "Размер ключа")
-        if keySize is None:
+        electronic_signature = ElectronicSignature()
+
+        keysFolderName = filedialog.askdirectory(title="Введите имя файла для сохранения ключей")
+        if not keysFolderName:
             return
 
-        fileName = filedialog.askopenfilename(title="Выберите файл")
+        secret_phrase = simpledialog.askstring(
+            "Введите парольную фразу для ключей",
+            "Парольная фраза",
+            show='*'
+        )
+        if secret_phrase is None:
+            return
+
+        electronic_signature.save_keys(pathlib.Path(keysFolderName), secret_phrase)
+
+        fileName = filedialog.askopenfilename(title="Выберите файл, который нужно подписать")
         if not fileName:
             return
 
@@ -40,24 +53,16 @@ class ChoiseKeyWindow(tk.Toplevel):
         if userName is None:
             return
 
-        electronic_signature = ElectronicSignature(int(keySize))
         electronic_signature.sign(pathlib.Path(fileName))
 
-        electronicSignatureFileName = filedialog.asksaveasfilename(title="Введите имя файла, куда необходимо сохранить подпись?")
+        electronicSignatureFileName = filedialog.asksaveasfilename(
+            title="Введите имя файла, куда необходимо сохранить подпись?"
+        )
         if not electronicSignatureFileName:
             return
 
         electronic_signature.save_signature(userName, pathlib.Path(electronicSignatureFileName))
 
-        keysFolderName = filedialog.askdirectory(title="Введите имя файла для сохранения ключей")
-        if not keysFolderName:
-            return
-
-        secret_phrase = simpledialog.askstring("Введите парольную фразу для ключей", "Парольная фраза")
-        if secret_phrase is None:
-            return
-
-        electronic_signature.save_keys(pathlib.Path(keysFolderName), secret_phrase)
         self.destroy()
 
     def _signalUsingExistingKey(self):
@@ -65,7 +70,11 @@ class ChoiseKeyWindow(tk.Toplevel):
         if not keysFolderName:
             return
 
-        secret_phrase = simpledialog.askstring("Введите парольную фразу для ключей", "Парольная фраза")
+        secret_phrase = simpledialog.askstring(
+            "Введите парольную фразу для ключей",
+            "Парольная фраза",
+            show='*'
+        )
         if secret_phrase is None:
             return
 
@@ -87,7 +96,9 @@ class ChoiseKeyWindow(tk.Toplevel):
 
         electronic_signature.sign(pathlib.Path(fileName))
 
-        electronicSignatureFileName = filedialog.asksaveasfilename(title="Введите имя файла, куда необходимо сохранить подпись?")
+        electronicSignatureFileName = filedialog.asksaveasfilename(
+            title="Введите имя файла, куда необходимо сохранить подпись?"
+        )
         if not electronicSignatureFileName:
             return
 
