@@ -47,9 +47,9 @@ class MainWindow(tk.Tk):
             verifyStatus = electronic_signature.verify(pathlib.Path(fileName), pathlib.Path(signatureFileName),
                                                    pathlib.Path(publicKeyPath))
             if verifyStatus.status:
-                message = f"Файл {fileName.title()}, был подписан пользователем {verifyStatus.user_name}"
+                message = f"Файл {fileName.split('/')[-1]}, был подписан пользователем {verifyStatus.user_name}"
             else:
-                message = f"Файл {fileName.title()}, был кем-то изменен, после подписания пользователем {verifyStatus.user_name}"
+                message = f"Файл {fileName.split('/')[-1]}, был кем-то изменен, после подписания пользователем {verifyStatus.user_name}"
         except Exception:
             message = f"Ошибка! Выбран некорректный файл"
 

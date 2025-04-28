@@ -3,67 +3,100 @@ import random
 from hashlib import sha256 as hash_func
 
 
-def is_prime(num: int) -> bool:
+def is_prime(n: int, k: int = 5) -> bool:
     """
     Функция проверяет число на простоту
 
-    :param num: Число
+    :param n: Число
+    :param k: Количество итераций
     :return: True - простое, False - составное
     """
-    if num <= 1:
+    if n <= 1:
         return False
-    for i in range(2, int(num ** 0.5) + 1):
-        if num % i == 0:
+
+    if n <= 3:
+        return True
+
+    r, s = 0, n - 1
+    while s % 2 == 0:
+        r += 1
+        s //= 2
+
+    for _ in range(k):
+        a = random.randint(2, n - 1)
+        x = pow(a, s, n)
+        if x == 1 or x == n - 1:
+            continue
+        for _ in range(r - 1):
+            x = pow(x, 2, n)
+        if x == n - 1:
+            break
+        else:
             return False
     return True
 
 
-def generate_prime(min_value: int, max_value: int) -> int | None:
+def generate_prime(min_val: int, max_val: int) -> int | None:
     """
-    Функция генерирует простое число на заданном отрезке или None, если не нашлось число на отрезке
+    Генерирует простое число в заданном диапазоне
 
-    :param min_value: Нижняя граница отрезка
-    :param max_value: Верхняя граница отрезка
-    :return: Простое число на заданном отрезке
+    :param min_val: минимальное значение (включительно)
+    :param max_val: максимальное значение (включительно)
+    :return: простое число или None, если не найдено
     """
-    for i in range(100):
-        num = random.randint(min_value, max_value)
+    for _ in range(100):
+        num = random.randint(min_val, max_val)
+        num |= 1  # делаем нечетным
         if is_prime(num):
             return num
     return None
 
 
-def generate_p_q(min_n: int, max_n: int) -> tuple[int, int] | None:
+def generate_p_q() -> tuple[int, int]:
     """
-    Функция генерирует два простых числа, в произведении дающих от min_n (512) до max_n (1024)
+    Генерирует два простых числа p и q, такие что:
+    - 512 ≤ bit_length(p * q) ≤ 1024
+    - p и q имеют примерно одинаковый размер (для безопасности)
 
-    :param min_n: Минимальное значение произведения простых чисел
-    :param max_n: Максимальное значение произведения простых чисел
-    :return: q, p - простые числа
+    :return: Кортеж (p, q) простых чисел
+    :raises RuntimeError: Если не удалось найти подходящие простые числа
     """
-    attempts, max_attempts = 0, 1000
+    max_attempts = 1000
 
-    while attempts < max_attempts:
-        p = generate_prime(2, max_n // 2 + 1)  # Генерируем p так, чтобы q было не меньше 2
+    for _ in range(max_attempts):
+        # Выбираем случайную целевую длину для n в диапазоне 512-1024 бит
+        target_n_bits = random.randint(512, 1024)
 
+        # Чтобы p и q были примерно одинакового размера
+        p_bits = target_n_bits // 2
+        q_bits = target_n_bits - p_bits
+
+        # Генерируем p (с небольшим запасом, чтобы точно попасть в диапазон)
+        p_min = 2 ** (p_bits - 1)
+        p_max = 2 ** p_bits - 1
+        p = generate_prime(p_min, p_max)
         if not p:
-            attempts += 1
             continue
 
-        max_q = max_n // p
-        q = generate_prime(2, max_q)
+        # Вычисляем допустимый диапазон для q
+        min_n = 2 ** (target_n_bits - 1)
+        max_n = 2 ** target_n_bits - 1
 
+        q_min = max(2 ** (q_bits - 1), (min_n + p - 1) // p)  # ceil(min_n / p)
+        q_max = min(2 ** q_bits - 1, max_n // p)  # floor(max_n / p)
+
+        if q_min > q_max:
+            continue
+
+        q = generate_prime(q_min, q_max)
         if not q:
-            attempts += 1
             continue
 
-        if min_n <= p * q <= max_n:
-            return q, p
-        else:
-            attempts += 1
-            continue
+        n = p * q
+        if 512 <= n.bit_length() <= 1024:
+            return p, q
 
-    return generate_p_q(min_n, max_n)
+    raise RuntimeError(f"Не удалось найти подходящие простые числа за {max_attempts} попыток")
 
 
 def generate_coprime(n: int) -> int:
@@ -100,4 +133,4 @@ def get_hash_fiat_shamir(message: bytes, x: list[int], n: int) -> bytes:
 
 
 if __name__ == '__main__':
-    print(generate_p_q(512, 9128))
+    print(generate_p_q())

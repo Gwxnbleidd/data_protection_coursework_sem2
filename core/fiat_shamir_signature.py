@@ -1,18 +1,14 @@
 from core.utils import *
 
 
-def generate_keypair(max_n: int, t: int = 8):
+def generate_keypair(t: int = 8):
     """
     Функция генерирует закрытый и открытый ключи
 
-    :param max_n: Максимальное возможное значение n
     :param t: Число значений в списках v и s
     :return: Открытый ключ, закрытый ключ
     """
-    if max_n < 512:
-        raise Exception('Число должно быть не меньше 512')
-
-    p, q = generate_p_q(512, max_n)
+    p, q = generate_p_q()
     n = p * q
 
     s = [generate_coprime(n) for i in range(t)]

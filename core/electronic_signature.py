@@ -15,7 +15,7 @@ class VerifyStatus:
 
 class ElectronicSignature:
     def __init__(self):
-        self.public_key, self.private_key = es.generate_keypair(1024, t=8)
+        self.public_key, self.private_key = es.generate_keypair(t=8)
 
     def sign(self, doc_name: pathlib.Path):
         file_info = FileInfo.collect(doc_name)
