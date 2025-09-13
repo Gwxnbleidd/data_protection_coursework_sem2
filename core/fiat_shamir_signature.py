@@ -11,7 +11,7 @@ def generate_keypair(t: int = 8):
     p, q = generate_p_q()
     n = p * q
 
-    s = [generate_coprime(n) for i in range(t)]
+    s = [generate_coprime(n) for _ in range(t)]
     v = [pow(s_val, -2, n) for s_val in s]
 
     return (n, v), (n, s)
@@ -73,7 +73,6 @@ def verify(public_key: tuple, sign: tuple, message: str) -> bool:
     hash_val = get_hash_fiat_shamir(message.encode('utf-8'), z, n)
     binary_hash = ''.join([format(byte, '08b') for byte in hash_val])
 
-    # Формируем новую битовую матрицу
     b_new = [[int(binary_hash[i * k + j]) for j in range(k)] for i in range(t)]
 
     return b == b_new

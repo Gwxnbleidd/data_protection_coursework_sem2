@@ -1,6 +1,6 @@
 import math
 import random
-from hashlib import sha256 as hash_func
+from hashlib import sha256
 
 
 def is_prime(n: int, k: int = 5) -> bool:
@@ -120,7 +120,7 @@ def get_hash_fiat_shamir(message: bytes, x: list[int], n: int) -> bytes:
     Функция получает хэш (по алгоритму sha256) сообщения и всех Х чисел
 
     :param message: Сообщение, которое нужно подписать
-    :param x: x_i = (r_i ** 2) % n, где r_i - случайное число от 1
+    :param x: Набор чисел, которые также нужно захэшировать
     :param n: произведение двух простых чисел p * q
     :return: хэш
     """
@@ -129,7 +129,7 @@ def get_hash_fiat_shamir(message: bytes, x: list[int], n: int) -> bytes:
     for x_val in x:
         data += x_val.to_bytes((n.bit_length() + 7) // 8, byteorder='big')
 
-    return hash_func(data).digest()
+    return sha256(data).digest()
 
 
 if __name__ == '__main__':
