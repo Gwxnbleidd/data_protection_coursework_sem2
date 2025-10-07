@@ -1,4 +1,4 @@
-from core.utils import *
+from app.core.utils import *
 
 
 def generate_keypair(t: int = 8):

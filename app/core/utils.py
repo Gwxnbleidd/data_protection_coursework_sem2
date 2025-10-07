@@ -3,36 +3,59 @@ import random
 from hashlib import sha256
 
 
-def is_prime(n: int, k: int = 5) -> bool:
+# def is_prime(n: int, k: int = 5) -> bool:
+#     """
+#     Функция проверяет число на простоту. Иногда ошибается
+#
+#     :param n: Число
+#     :param k: Количество итераций
+#     :return: True - простое, False - составное
+#     """
+#     if n <= 1:
+#         return False
+#
+#     if n <= 3:
+#         return True
+#
+#     r, s = 0, n - 1
+#     while s % 2 == 0:
+#         r += 1
+#         s //= 2
+#
+#     for _ in range(k):
+#         a = random.randint(2, n - 1)
+#         x = pow(a, s, n)
+#         if x == 1 or x == n - 1:
+#             continue
+#         for _ in range(r - 1):
+#             x = pow(x, 2, n)
+#         if x == n - 1:
+#             break
+#         else:
+#             return False
+#     return True
+def is_prime(n: int) -> bool:
     """
-    Функция проверяет число на простоту
+    Детерминированная функция проверки числа на простоту.
+    Гарантированно правильная для всех чисел до 2^64.
 
-    :param n: Число
-    :param k: Количество итераций
+    :param n: Число для проверки
     :return: True - простое, False - составное
     """
     if n <= 1:
         return False
-
     if n <= 3:
         return True
+    if n % 2 == 0 or n % 3 == 0:
+        return False
 
-    r, s = 0, n - 1
-    while s % 2 == 0:
-        r += 1
-        s //= 2
-
-    for _ in range(k):
-        a = random.randint(2, n - 1)
-        x = pow(a, s, n)
-        if x == 1 or x == n - 1:
-            continue
-        for _ in range(r - 1):
-            x = pow(x, 2, n)
-        if x == n - 1:
-            break
-        else:
+    # Проверка делением на все числа вида 6k ± 1
+    i = 5
+    while i * i <= n:
+        if n % i == 0 or n % (i + 2) == 0:
             return False
+        i += 6
+
     return True
 
 
