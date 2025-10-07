@@ -1,13 +1,29 @@
 stages:
   - build
-  - test_math
+  - test-math
   - deploy
 
+build-job:
+  stage: build
+  tags:
+    - my-runner
+  script:
+    - docker build -t my-signature-app .
+    - docker run --rm my-signature-app python -c "import app.main; print('Application imports successfully')"
+    - echo "Container built and tested successfully!"
 
-deploy-job:      # This job runs in the deploy stage.
-  stage: deploy  # It only runs when *both* jobs in the test stage complete successfully.
+test-math-job:
+  stage: test-math
+  tags:
+    - my-runner
+  script:
+    - docker run --rm my-signature-app pytest tests/test_math.py -v
+    - echo "Math test successfully!"
+
+deploy-job:
+  stage: deploy
   tags:
     - my-runner
   script:
     - echo "Deploying application..."
-    - echo "Application successfully deployed."
+    - echo "Application successfully deployed."  # Заглушка, некуда деплоить, но в образовательных целях указал
